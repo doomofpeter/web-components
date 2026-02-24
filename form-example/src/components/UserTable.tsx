@@ -14,7 +14,7 @@ const mockUsers: User[] = [
   { id: '3', name: 'Bob Wilson', email: 'bob@example.com', bio: 'Designer' },
 ];
 
-export const UserTable = () => {
+export function UserTable() {
   const { openDialog, setEditingUser, setOnSuccess } = useFormStore();
 
   const handleEdit = (user: User) => {

@@ -1,16 +1,14 @@
-import React from 'react';
-
 interface CarouselCardProps {
   title: string;
   description: string;
   imageUrl?: string;
 }
 
-export const CarouselCard: React.FC<CarouselCardProps> = ({
+export function CarouselCard({
   title,
   description,
   imageUrl,
-}) => {
+}: CarouselCardProps) {
   return (
     <div className="embla__slide flex-[0_0_25%] min-w-0 px-2">
       <div className="bg-white rounded-lg shadow-md overflow-hidden h-full border border-gray-200">
@@ -32,4 +30,4 @@ export const CarouselCard: React.FC<CarouselCardProps> = ({
       </div>
     </div>
   );
-};
+}

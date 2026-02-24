@@ -39,7 +39,7 @@ const useEditUser = () => {
   };
 };
 
-export const EditUserDialog = () => {
+export function EditUserDialog() {
   const { isOpen, closeDialog, editingUser, isSubmitting } = useFormStore();
   const editUser = useEditUser();
   

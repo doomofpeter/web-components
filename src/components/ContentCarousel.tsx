@@ -14,10 +14,10 @@ interface ContentCarouselProps {
   items: CarouselItem[];
 }
 
-export const ContentCarousel: React.FC<ContentCarouselProps> = ({
+export function ContentCarousel({
   title,
   items,
-}) => {
+}: ContentCarouselProps) {
   const [emblaRef, emblaApi] = useEmblaCarousel({
     align: 'start',
     slidesToScroll: 1,
@@ -75,4 +75,4 @@ export const ContentCarousel: React.FC<ContentCarouselProps> = ({
       </div>
     </div>
   );
-};
+}
