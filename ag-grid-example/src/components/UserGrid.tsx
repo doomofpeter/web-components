@@ -1,11 +1,12 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useEffect, useMemo, useCallback, useRef } from 'react';
 import { AgGridReact } from 'ag-grid-react';
-import { ColDef, GridReadyEvent, ICellRendererParams } from 'ag-grid-community';
-import { User } from './types';
-import { mockUsers } from './data';
+import { ColDef, GridReadyEvent, ICellRendererParams, GridApi } from 'ag-grid-community';
+import { useUserStore, User } from '../store/userStore';
+import { mockUsers } from '../data';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
 
+// Status Cell Renderer
 function StatusCellRenderer(props: ICellRendererParams<User, string>) {
   const value = props.value;
   const colors = {
@@ -21,6 +22,7 @@ function StatusCellRenderer(props: ICellRendererParams<User, string>) {
   );
 }
 
+// Role Cell Renderer
 function RoleCellRenderer(props: ICellRendererParams<User, string>) {
   const value = props.value;
   const colors = {
@@ -36,6 +38,7 @@ function RoleCellRenderer(props: ICellRendererParams<User, string>) {
   );
 }
 
+// Date Cell Renderer
 function DateCellRenderer(props: ICellRendererParams<User, string>) {
   const value = props.value;
   if (!value) return null;
@@ -48,36 +51,40 @@ function DateCellRenderer(props: ICellRendererParams<User, string>) {
   );
 }
 
+// Actions Cell Renderer
 function ActionsCellRenderer(props: ICellRendererParams<User>) {
-  const handleEdit = () => {
-    props.data && console.log('Edit:', props.data.id);
-  };
+  const { openDialog } = useUserStore();
   
-  const handleDelete = () => {
-    props.data && console.log('Delete:', props.data.id);
+  const handleEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    props.data && openDialog(props.data);
   };
   
   return (
-    <div className="flex gap-2">
-      <button
-        onClick={handleEdit}
-        className="text-blue-600 hover:text-blue-800 text-sm font-medium"
-      >
-        Edit
-      </button>
-      <button
-        onClick={handleDelete}
-        className="text-red-600 hover:text-red-800 text-sm font-medium"
-      >
-        Delete
-      </button>
-    </div>
+    <button
+      onClick={handleEdit}
+      className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+    >
+      Edit
+    </button>
   );
 }
 
 export function UserGrid() {
-  const [rowData] = useState<User[]>(mockUsers);
-  const [selectedRows, setSelectedRows] = useState<User[]>([]);
+  const gridRef = useRef<AgGridReact>(null);
+  const {
+    users,
+    setUsers,
+    selectedIds,
+    setSelectedIds,
+    deleteUsers,
+    openDialog,
+  } = useUserStore();
+
+  // Initialize users from mock data
+  useEffect(() => {
+    setUsers(mockUsers);
+  }, [setUsers]);
 
   const columnDefs = useMemo<ColDef[]>(() => [
     {
@@ -143,9 +150,9 @@ export function UserGrid() {
       filter: false,
       cellRenderer: ActionsCellRenderer,
       pinned: 'right',
-      width: 150,
+      width: 100,
     },
-  ], []);
+  ], [openDialog]);
 
   const defaultColDef = useMemo<ColDef>(() => ({
     resizable: true,
@@ -157,18 +164,18 @@ export function UserGrid() {
 
   const onSelectionChanged = useCallback(() => {
     const selected = gridRef.current?.api.getSelectedRows() || [];
-    setSelectedRows(selected);
-  }, []);
-
-  const gridRef = { current: null as { api: { exportDataAsCsv: () => void; getSelectedRows: () => User[] } } | null };
+    setSelectedIds(selected.map((r) => r.id));
+  }, [setSelectedIds]);
 
   const handleExport = useCallback(() => {
     gridRef.current?.api.exportDataAsCsv();
   }, []);
 
   const handleDeleteSelected = useCallback(() => {
-    console.log('Delete selected:', selectedRows.map(r => r.id));
-  }, [selectedRows]);
+    if (selectedIds.length > 0) {
+      deleteUsers(selectedIds);
+    }
+  }, [selectedIds, deleteUsers]);
 
   return (
     <div className="p-6">
@@ -177,11 +184,17 @@ export function UserGrid() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Users</h1>
           <p className="text-gray-500 text-sm mt-1">
-            {rowData.length} users · {selectedRows.length} selected
+            {users.length} users · {selectedIds.length} selected
           </p>
         </div>
         
         <div className="flex gap-3">
+          <button
+            onClick={() => openDialog()}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700"
+          >
+            Add User
+          </button>
           <button
             onClick={handleExport}
             className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50"
@@ -190,7 +203,7 @@ export function UserGrid() {
           </button>
           <button
             onClick={handleDeleteSelected}
-            disabled={selectedRows.length === 0}
+            disabled={selectedIds.length === 0}
             className="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Delete Selected
@@ -202,7 +215,7 @@ export function UserGrid() {
       <div className="ag-theme-alpine rounded-lg border border-gray-200 overflow-hidden">
         <AgGridReact
           ref={gridRef}
-          rowData={rowData}
+          rowData={users}
           columnDefs={columnDefs}
           defaultColDef={defaultColDef}
           rowSelection="multiple"
@@ -213,6 +226,7 @@ export function UserGrid() {
           onGridReady={onGridReady}
           onSelectionChanged={onSelectionChanged}
           animateRows={true}
+          getRowId={(params) => params.data.id}
         />
       </div>
     </div>
