@@ -1,12 +1,5 @@
 /**
  * QueryClient Provider Setup
- * 
- * Usage:
- *   import { QueryProvider } from './providers';
- *   
- *   <QueryProvider>
- *     <App />
- *   </QueryProvider>
  */
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -15,8 +8,8 @@ import { ReactNode } from 'react';
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 5, // 5 min
-      gcTime: 1000 * 60 * 30, // 30 min (formerly cacheTime)
+      staleTime: 1000 * 60 * 5,
+      gcTime: 1000 * 60 * 30,
       retry: 1,
       refetchOnWindowFocus: false,
     },
@@ -38,10 +31,8 @@ export function QueryProvider({ children }: Props) {
   );
 }
 
-// Query Keys Export
 export const queryKeys = {
   all: ['api'] as const,
   users: () => [...queryKeys.all, 'users'] as const,
   user: (id: string) => [...queryKeys.users(), id] as const,
-  // Add more as needed
 };
