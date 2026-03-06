@@ -35,7 +35,8 @@ export type ApiError = z.infer<typeof ApiErrorSchema>;
 
 // ============== FETCHER ==============
 
-const BASE_URL = (import.meta as any).env?.VITE_API_URL || 'https://dein-backend.com';
+// Use relative URL for Vite proxy, or full URL for production
+const BASE_URL = (import.meta as any).env?.VITE_API_URL || '';
 
 async function fetchApi<T>(
   endpoint: string,
