@@ -1,18 +1,19 @@
 /**
  * TanStack Router Setup
+ * With Type-Safe Navigation
  */
 
 import { 
   createRouter, 
   createRootRoute, 
   createRoute, 
-  Outlet, 
-  Link 
+  Outlet 
 } from '@tanstack/react-router';
 import React from 'react';
 import { QueryProvider } from './providers';
 import { useUsers, useUser, useUpdateUser, useDeleteUser } from './lib/api';
 import type { User } from './lib/api';
+import { ResponsiveNav } from './components/Navigation';
 
 // ============== ROOT ROUTE ==============
 
@@ -20,26 +21,10 @@ const rootRoute = createRootRoute({
   component: () => (
     <QueryProvider>
       <div className="min-h-screen bg-gray-50">
-        <nav className="bg-white shadow-sm border-b">
-          <div className="max-w-4xl mx-auto px-4 py-3 flex gap-6">
-            <Link
-              to="/"
-              className="text-gray-700 hover:text-blue-600 font-medium"
-              activeProps={{ className: 'text-blue-600' }}
-            >
-              Home
-            </Link>
-            <Link
-              to="/users"
-              className="text-gray-700 hover:text-blue-600 font-medium"
-              activeProps={{ className: 'text-blue-600' }}
-            >
-              Users
-            </Link>
-          </div>
-        </nav>
+        {/* Type-Safe Navigation */}
+        <ResponsiveNav />
         
-        <main className="max-w-4xl mx-auto px-4 py-8">
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <Outlet />
         </main>
       </div>
@@ -56,8 +41,8 @@ const indexRoute = createRoute({
     return (
       <div className="space-y-4">
         <h1 className="text-3xl font-bold text-gray-900">Willkommen! 👋</h1>
-        <p className="text-gray-Stack Start App mit600">
-          Tan Negotiate Auth
+        <p className="text-gray-600">
+          TanStack Start App mit Negotiate Auth
         </p>
         
         <div className="mt-8 p-4 bg-blue-50 rounded-lg">
@@ -115,13 +100,9 @@ const usersRoute = createRoute({
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
-                    <Link
-                      to="/users/$id"
-                      params={{ id: user.id }}
-                      className="text-blue-600 hover:text-blue-900 mr-3"
-                    >
+                    <span className="text-blue-600 hover:text-blue-900 mr-3">
                       Edit
-                    </Link>
+                    </span>
                     <button
                       onClick={() => deleteUser.mutate({ id: user.id })}
                       disabled={deleteUser.isPending}
