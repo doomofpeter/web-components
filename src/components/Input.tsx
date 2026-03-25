@@ -6,7 +6,7 @@
  * - Placeholder
  * - Icon (left/right)
  * - Helper text (errors)
- * - Zod + TanStack Form support (optional)
+ * - React Hook Form support
  */
 
 import React, { forwardRef } from 'react';
@@ -146,34 +146,30 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 
 Input.displayName = 'Input';
 
-// ============== HOOK FORM VERSION ==============
+// ============== REACT HOOK FORM INPUT ==============
 
-export interface HookFormInputProps extends Omit<InputProps, 'onChange' | 'onBlur' | 'value'> {
-  name: string;
+export interface ReactHookFormInputProps extends Omit<InputProps, 'onChange' | 'onBlur' | 'value' | 'variant'> {
+  /** Error message from react-hook-form */
   error?: string;
-  onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  onBlur?: (event: React.FocusEvent<HTMLInputElement>) => void;
-  value?: string;
 }
 
-export const HookFormInput = forwardRef<HTMLInputElement, HookFormInputProps>(
-  ({ name, error, variant = 'default', helperText, ...props }, ref) => {
-    const actualVariant = error ? 'error' : variant;
-    const actualHelperText = error || helperText;
+export const ReactHookFormInput = forwardRef<HTMLInputElement, ReactHookFormInputProps>(
+  ({ error, helperText, ...props }, ref) => {
+    const variant: InputVariant = error ? 'error' : 'default';
+    const finalHelperText = error || helperText;
 
     return (
       <Input
         ref={ref}
         {...props}
-        name={name}
-        variant={actualVariant}
-        helperText={actualHelperText}
+        variant={variant}
+        helperText={finalHelperText}
       />
     );
   }
 );
 
-HookFormInput.displayName = 'HookFormInput';
+ReactHookFormInput.displayName = 'ReactHookFormInput';
 
 // ============== DEFAULT EXPORT ==============
 
