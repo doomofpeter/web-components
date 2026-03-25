@@ -7,6 +7,7 @@
  * - Icon (left/right)
  * - Helper text (errors)
  * - React Hook Form support
+ * - TanStack Form support
  */
 
 import React, { forwardRef } from 'react';
@@ -170,6 +171,67 @@ export const ReactHookFormInput = forwardRef<HTMLInputElement, ReactHookFormInpu
 );
 
 ReactHookFormInput.displayName = 'ReactHookFormInput';
+
+// ============== TANSTACK FORM INPUT ==============
+
+/**
+ * TanStack Form Input
+ * 
+ * Usage with TanStack Form + Zod:
+ * 
+ *   import { useForm } from '@tanstack/react-form';
+ *   import { zodValidator } from '@tanstack/zod-form-adapter';
+ *   import { z } from 'zod';
+ *   
+ *   const form = useForm({
+ *     defaultValues: { email: '' },
+ *     validators: { onChange: zodValidator(z.object({ email: z.string().email() })) }
+ *   });
+ *   
+ *   // In your component:
+ *   <TanStackFormInput form={form} name="email" label="Email" placeholder="..." />
+ * 
+ * Or use FormField from @tanstack/react-form:
+ * 
+ *   <FormField name="email" validators={{ onChange: z.string().email() }}>
+ *     {({ field }) => <Input {...field} label="Email" />}
+ *   </FormField>
+ */
+
+export interface TanStackFormInputProps extends Omit<InputProps, 'onChange' | 'onBlur' | 'value' | 'name' | 'variant'> {
+  /** Field name */
+  name: string;
+  /** The form instance from useForm */
+  form: any;
+  /** Optional helper text */
+  helperText?: string;
+}
+
+export const TanStackFormInput = forwardRef<HTMLInputElement, TanStackFormInputProps>(
+  ({ name, form, helperText: externalHelperText, ...props }, ref) => {
+    // Get field from form - useField requires form in options
+    const field = form?.getField?.(name);
+    
+    const error = field?.meta?.errors?.join(', ');
+    const variant: InputVariant = error ? 'error' : 'default';
+    const finalHelperText = error || externalHelperText;
+
+    return (
+      <Input
+        ref={ref}
+        {...props}
+        name={name}
+        value={field?.state?.value}
+        onChange={(e: React.ChangeEvent<HTMLInputElement>) => field?.handleChange?.(e)}
+        onBlur={(e: React.FocusEvent<HTMLInputElement>) => field?.handleBlur?.(e)}
+        variant={variant}
+        helperText={finalHelperText}
+      />
+    );
+  }
+);
+
+TanStackFormInput.displayName = 'TanStackFormInput';
 
 // ============== DEFAULT EXPORT ==============
 
